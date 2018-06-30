@@ -24,7 +24,6 @@ sockets = Sockets(app)
 redis = redis.from_url(REDIS_URL)
 
 
-
 class ChatBackend(object):
     """Interface for registering and updating WebSocket clients."""
 
@@ -62,6 +61,7 @@ class ChatBackend(object):
         """Maintains Redis subscription in the background."""
         gevent.spawn(self.run)
 
+
 chats = ChatBackend()
 chats.start()
 
@@ -69,6 +69,7 @@ chats.start()
 @app.route('/')
 def hello():
     return render_template('index.html')
+
 
 @sockets.route('/submit')
 def inbox(ws):
@@ -82,6 +83,7 @@ def inbox(ws):
             app.logger.info(u'Inserting message: {}'.format(message))
             redis.publish(REDIS_CHAN, message)
 
+
 @sockets.route('/receive')
 def outbox(ws):
     """Sends outgoing chat messages, via `ChatBackend`."""
@@ -90,6 +92,3 @@ def outbox(ws):
     while not ws.closed:
         # Context switch while `ChatBackend.start` is running in the background.
         gevent.sleep(0.1)
-
-
-
