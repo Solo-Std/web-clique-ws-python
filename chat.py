@@ -1,4 +1,14 @@
+# -*- coding: utf-8 -*-
+
+"""
+Chat Server
+===========
+
+This simple application uses WebSockets to run a primitive chat server.
+"""
+
 import os
+import logging
 import redis
 import gevent
 from flask import Flask, render_template
@@ -12,6 +22,7 @@ app.debug = 'DEBUG' in os.environ
 
 sockets = Sockets(app)
 redis = redis.from_url(REDIS_URL)
+
 
 
 class ChatBackend(object):
@@ -51,10 +62,13 @@ class ChatBackend(object):
         """Maintains Redis subscription in the background."""
         gevent.spawn(self.run)
 
-
 chats = ChatBackend()
 chats.start()
 
+
+@app.route('/')
+def hello():
+    return render_template('index.html')
 
 @sockets.route('/submit')
 def inbox(ws):
@@ -68,7 +82,6 @@ def inbox(ws):
             app.logger.info(u'Inserting message: {}'.format(message))
             redis.publish(REDIS_CHAN, message)
 
-
 @sockets.route('/receive')
 def outbox(ws):
     """Sends outgoing chat messages, via `ChatBackend`."""
@@ -77,3 +90,6 @@ def outbox(ws):
     while not ws.closed:
         # Context switch while `ChatBackend.start` is running in the background.
         gevent.sleep(0.1)
+
+
+
