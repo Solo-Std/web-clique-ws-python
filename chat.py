@@ -1,14 +1,4 @@
-# -*- coding: utf-8 -*-
-
-"""
-Chat Server
-===========
-
-This simple application uses WebSockets to run a primitive chat server.
-"""
-
 import os
-import logging
 import redis
 import gevent
 from flask import Flask, render_template
@@ -66,9 +56,9 @@ chats = ChatBackend()
 chats.start()
 
 
-@app.route('/')
-def hello():
-    return render_template('index.html')
+@sockets.route('/show')
+def show_subs(ws):
+    print(client for client in chats.clients)
 
 
 @sockets.route('/submit')
