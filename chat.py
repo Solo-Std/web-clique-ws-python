@@ -1,7 +1,8 @@
 import os
-import redis
+
 import gevent
-from flask import Flask, render_template
+import redis
+from flask import Flask
 from flask_sockets import Sockets
 
 REDIS_URL = os.environ['REDIS_URL']
@@ -56,11 +57,6 @@ chats = ChatBackend()
 chats.start()
 
 
-@sockets.route('/show')
-def show_subs(ws):
-    print(client for client in chats.clients)
-
-
 @sockets.route('/submit')
 def inbox(ws):
     """Receives incoming chat messages, inserts them into Redis."""
@@ -72,7 +68,7 @@ def inbox(ws):
         if message:
             app.logger.info(u'Inserting message: {}'.format(message))
             redis.publish(REDIS_CHAN, message)
-
+    
 
 @sockets.route('/receive')
 def outbox(ws):
